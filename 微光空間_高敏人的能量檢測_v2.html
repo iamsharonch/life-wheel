@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>能量檢測｜微光前行 · 高敏人的生命之輪</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500;600&family=Noto+Sans+TC:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap');
+:root{
+  --c-mist-blue:#D6E4F0;--c-still-blue:#8EAFC7;--c-warm-sand:#F5EFE0;
+  --c-clay:#C9B99A;--c-glimmer:#E8D5C4;--c-deep-ink:#3D3D3D;
+  --bg:var(--c-warm-sand);--bg-alt:#FBF7EF;--surface:#FFFFFF;
+  --surface-soft:var(--c-mist-blue);--surface-warm:var(--c-glimmer);
+  --fg:var(--c-deep-ink);--fg-strong:#2A2A2A;--fg-soft:#6B6863;
+  --fg-hint:#A39E94;--fg-on-dark:#F5EFE0;
+  --accent:var(--c-still-blue);--accent-warm:var(--c-clay);--accent-glow:var(--c-glimmer);
+  --border:rgba(61,61,61,.12);--border-soft:rgba(61,61,61,.06);--border-warm:rgba(201,185,154,.4);
+  --shadow-sm:0 1px 2px rgba(61,61,61,.04),0 1px 3px rgba(61,61,61,.06);
+  --shadow-md:0 2px 12px rgba(61,61,61,.06),0 4px 20px rgba(142,175,199,.10);
+  --shadow-warm:0 8px 28px rgba(201,185,154,.18);
+  --r-xs:6px;--r-sm:10px;--r-md:16px;--r-lg:20px;--r-xl:28px;--r-pill:999px;
+  --font-serif:'Noto Serif TC','Songti TC',serif;
+  --font-sans:'Noto Sans TC',-apple-system,sans-serif;
+  --font-italic:'Cormorant Garamond','Noto Serif TC',serif;
+  --ease-soft:cubic-bezier(.4,0,.2,1);--ease-out:cubic-bezier(.16,1,.3,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);font-weight:300;font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased}
+body{overflow-x:hidden;min-height:100vh;position:relative}
+.bg-wash{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg-wash svg{width:100%;height:100%}
+.bg-rings{position:fixed;top:50%;left:50%;width:1400px;height:1400px;transform:translate(-50%,-50%);z-index:0;pointer-events:none;opacity:.5;animation:spin 90s linear infinite}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+main{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:64px 32px 120px}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(245,239,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--border-soft)}
+.topbar-inner{max-width:820px;margin:0 auto;height:60px;padding:0 32px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{font-family:var(--font-serif);font-size:14px;font-weight:400;letter-spacing:.22em;color:var(--fg-strong);text-decoration:none}
+.hud{display:inline-flex;align-items:center;gap:14px;font-family:'Courier New',monospace;font-size:11px;letter-spacing:.12em;color:var(--fg-soft)}
+.hud-pixel{width:8px;height:8px;background:var(--accent-warm);box-shadow:8px 0 0 var(--accent-warm),0 8px 0 var(--accent-warm);display:inline-block}
+.screen{display:none;animation:fadeUp .6s var(--ease-out)}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.eyebrow{font-family:var(--font-sans);font-size:11px;font-weight:400;letter-spacing:.32em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:12px;margin-bottom:20px}
+.eyebrow::before{content:'';width:28px;height:1px;background:currentColor;opacity:.6}
+.pixel-tag{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:var(--c-deep-ink);color:var(--c-warm-sand);font-family:'Courier New',monospace;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;border-radius:0;box-shadow:3px 3px 0 var(--accent-warm),3px 3px 0 1px var(--c-deep-ink);margin-bottom:24px}
+.pixel-tag .blink{display:inline-block;width:6px;height:6px;background:var(--accent-glow);animation:blink 1s steps(2) infinite}
+@keyframes blink{to{opacity:0}}
+.intro-title{font-family:var(--font-serif);font-weight:300;font-size:clamp(32px,5vw,48px);line-height:1.3;color:var(--fg-strong);margin-bottom:24px}
+.intro-title em{font-family:var(--font-italic);font-style:italic;font-weight:400;color:var(--accent-warm)}
+.intro-lede{font-family:var(--font-serif);font-weight:400;font-size:17px;line-height:1.9;color:var(--fg-strong);margin-bottom:20px;max-width:580px}
+.intro-quote{margin:36px 0;padding:24px 28px;background:var(--surface-warm);border-radius:var(--r-lg);border-left:2px solid var(--accent-warm)}
+.intro-quote-q{font-family:var(--font-italic);font-style:italic;font-weight:400;font-size:18px;line-height:1.7;color:var(--fg-strong)}
+.intro-quote-attr{margin-top:8px;font-size:12px;letter-spacing:.14em;color:var(--fg-hint)}
+.wheel-preview{margin:24px 0 36px;padding:28px 24px;background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--r-lg);box-shadow:var(--shadow-md)}
+.wheel-preview-title{font-family:'Courier New',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.wheel-preview-title::after{content:'';flex:1;height:1px;background:var(--border-soft)}
+.wheel-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.wheel-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;gap:6px;background:var(--bg-alt);border:1px solid var(--border-soft);border-radius:var(--r-md);text-align:center}
+.wheel-cell-emoji{font-size:20px}
+.wheel-cell-label{font-family:var(--font-serif);font-size:12px;color:var(--fg-strong)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 32px;border-radius:var(--r-lg);font-family:var(--font-sans);font-size:14px;font-weight:300;letter-spacing:.12em;text-decoration:none;cursor:pointer;border:none;transition:all .25s var(--ease-soft);min-height:48px}
+.btn-warm{background:var(--accent-warm);color:white}
+.btn-warm:hover{background:#B5A586;transform:translateY(-1px);box-shadow:var(--shadow-warm)}
+.btn-ghost{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}
+.btn-ghost:hover{background:rgba(142,175,199,.1)}
+.btn-quiet{background:none;color:var(--fg-hint);font-size:13px;padding:10px 20px;letter-spacing:.08em}
+.btn-quiet:hover{color:var(--accent)}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.btn-start{position:relative;background:var(--accent-warm);color:white;font-family:'Courier New',monospace;font-weight:700;letter-spacing:.2em;padding:16px 36px;border-radius:0;box-shadow:4px 4px 0 var(--c-deep-ink);transition:all .15s var(--ease-soft)}
+.btn-start:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--c-deep-ink)}
+.btn-start:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--c-deep-ink)}
+/* Stage */
+.stage-hud{margin:8px 0 36px;padding:18px 22px;background:var(--c-deep-ink);color:var(--fg-on-dark);border-radius:var(--r-md);display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center}
+.stage-hud-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.stage-hud-label{font-family:'Courier New',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(245,239,224,.5)}
+.stage-hud-value{font-family:var(--font-italic);font-style:italic;font-weight:400;font-size:18px;color:var(--accent-glow)}
+.stage-pips{display:flex;gap:4px}
+.stage-pip{width:14px;height:14px;background:rgba(245,239,224,.12)}
+.stage-pip.done{background:var(--accent-warm)}
+.stage-pip.current{background:var(--accent-glow);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+.stage-header{margin-bottom:32px}
+.stage-header-emoji{font-size:36px;margin-bottom:14px;display:inline-block;animation:gentle-bob 3s ease-in-out infinite}
+@keyframes gentle-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.stage-tag{display:inline-flex;align-items:center;gap:10px;padding:4px 10px;font-family:'Courier New',monospace;font-size:10px;letter-spacing:.2em;background:var(--c-deep-ink);color:var(--c-warm-sand);margin-bottom:14px}
+.stage-theme{font-family:var(--font-serif);font-weight:300;font-size:clamp(26px,4vw,34px);line-height:1.35;color:var(--fg-strong);margin-bottom:14px}
+.stage-theme em{font-family:var(--font-italic);font-style:italic;font-weight:400;color:var(--accent-warm)}
+.stage-hint{display:none}
+
+/* Question cards — single choice (radio style) */
+.q-list{display:flex;flex-direction:column;gap:12px;margin-bottom:40px}
+.q-card{position:relative;display:flex;gap:16px;padding:20px 22px;background:var(--surface);border:1.5px solid var(--border-soft);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);cursor:pointer;transition:all .22s var(--ease-soft);user-select:none;align-items:flex-start}
+.q-card:hover{border-color:var(--border);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.q-card.selected{background:linear-gradient(160deg,#FFFEFB 0%,var(--surface-warm) 130%);border-color:var(--accent-warm);box-shadow:var(--shadow-warm)}
+.q-radio{flex-shrink:0;margin-top:3px;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);background:var(--bg-alt);display:flex;align-items:center;justify-content:center;transition:all .22s var(--ease-soft)}
+.q-card:hover .q-radio{border-color:var(--accent)}
+.q-card.selected .q-radio{background:var(--accent-warm);border-color:var(--accent-warm)}
+.q-radio-dot{width:8px;height:8px;border-radius:50%;background:white;opacity:0;transform:scale(0);transition:all .2s var(--ease-out) .04s}
+.q-card.selected .q-radio-dot{opacity:1;transform:scale(1)}
+.q-body{flex:1;min-width:0}
+.q-label{font-family:'Courier New',monospace;font-size:10px;letter-spacing:.18em;color:var(--fg-strong);margin-bottom:5px;text-transform:uppercase}
+.q-text{font-family:var(--font-serif);font-weight:400;font-size:15px;line-height:1.75;color:var(--fg-strong)}
+.q-sub{font-size:13px;line-height:1.7;color:var(--fg-soft);margin-top:4px}
+.q-emoji-badge{font-size:16px;margin-right:6px}
+
+/* Stage nav */
+.stage-nav{display:flex;align-items:center;justify-content:space-between;margin-top:36px;padding-top:28px;border-top:1px solid var(--border-soft);gap:12px;flex-wrap:wrap}
+.stage-nav-hint{font-family:'Courier New',monospace;font-size:11px;letter-spacing:.12em;color:var(--fg-hint);text-align:center;flex:1}
+
+/* Result */
+.result-hero{padding-top:8px}
+.victory-banner{text-align:center;margin-bottom:32px;padding:36px 24px;background:var(--c-deep-ink);color:var(--fg-on-dark);border-radius:var(--r-lg);position:relative;overflow:hidden}
+.victory-banner::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 30%,rgba(232,213,196,.15),transparent 40%),radial-gradient(circle at 80% 70%,rgba(201,185,154,.12),transparent 40%);pointer-events:none}
+.victory-tag{position:relative;display:inline-block;font-family:'Courier New',monospace;font-size:11px;letter-spacing:.3em;color:var(--accent-glow);padding:4px 12px;border:1px solid rgba(232,213,196,.35);margin-bottom:16px;animation:blink-soft 1.6s ease-in-out infinite}
+@keyframes blink-soft{0%,100%{opacity:1}50%{opacity:.55}}
+.victory-emoji{position:relative;font-size:68px;line-height:1;margin:8px 0 16px;animation:float 4s var(--ease-soft) infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.victory-title{position:relative;font-family:var(--font-serif);font-weight:300;font-size:clamp(26px,4vw,36px);line-height:1.25;margin-bottom:8px}
+.victory-title em{font-family:var(--font-italic);font-style:italic;font-weight:400;color:var(--accent-glow)}
+.victory-sub{position:relative;font-family:var(--font-italic);font-style:italic;font-size:14px;letter-spacing:.12em;color:rgba(245,239,224,.7)}
+.char-card{display:grid;grid-template-columns:140px 1fr;gap:24px;padding:28px;background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--r-lg);box-shadow:var(--shadow-md);margin-bottom:28px;align-items:stretch}
+.char-portrait{background:linear-gradient(155deg,var(--c-mist-blue),var(--accent-glow));border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-size:56px;box-shadow:var(--shadow-warm);position:relative;overflow:hidden}
+.char-portrait::before,.char-portrait::after{content:'';position:absolute;background:rgba(255,255,255,.5);border-radius:50%;filter:blur(6px)}
+.char-portrait::before{width:30px;height:30px;top:10%;left:10%}
+.char-portrait::after{width:20px;height:20px;bottom:12%;right:12%;opacity:.35}
+.char-portrait-emoji{position:relative;z-index:1}
+.char-info{display:flex;flex-direction:column;gap:8px}
+.char-class{font-family:'Courier New',monospace;font-size:10px;letter-spacing:.25em;color:var(--accent);text-transform:uppercase}
+.char-name{font-family:var(--font-serif);font-weight:400;font-size:22px;line-height:1.3;color:var(--fg-strong)}
+.char-name em{font-family:var(--font-italic);font-style:italic;color:var(--accent-warm)}
+.char-tag{font-family:var(--font-italic);font-style:italic;font-size:14px;color:var(--accent-warm)}
+/* Energy bars (replacing HP/MP/DEF) */
+.stats{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.stat-row{display:grid;grid-template-columns:72px 1fr 32px;align-items:center;gap:10px}
+.stat-label{font-family:'Courier New',monospace;font-size:10px;letter-spacing:.1em;color:var(--fg-soft);white-space:nowrap}
+.stat-bar{height:8px;background:var(--bg-alt);border-radius:0;overflow:hidden;position:relative;border:1px solid var(--border-soft)}
+.stat-fill{position:absolute;inset:0 auto 0 0;transition:width 1.2s var(--ease-out)}
+.stat-fill.high{background-image:repeating-linear-gradient(90deg,var(--c-still-blue) 0,var(--c-still-blue) 6px,#6F94B0 6px,#6F94B0 8px)}
+.stat-fill.mid{background-image:repeating-linear-gradient(90deg,var(--accent-warm) 0,var(--accent-warm) 6px,var(--c-clay) 6px,var(--c-clay) 8px)}
+.stat-fill.low{background-image:repeating-linear-gradient(90deg,#C97A6E 0,#C97A6E 6px,#A85F54 6px,#A85F54 8px)}
+.stat-num{font-family:'Courier New',monospace;font-size:11px;color:var(--fg-soft);text-align:right}
+.result-message{padding:28px 32px;background:var(--surface-warm);border-radius:var(--r-lg);border-left:2px solid var(--accent-warm);margin-bottom:48px}
+.result-message-q{font-family:var(--font-italic);font-style:italic;font-weight:400;font-size:18px;line-height:1.7;color:var(--accent-warm);margin-bottom:12px}
+.result-message-body{font-size:15px;line-height:1.95;color:var(--fg-strong)}
+.wheel-diag{margin-bottom:48px;padding:28px;background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--r-lg);box-shadow:var(--shadow-md)}
+.wheel-diag-head{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.wheel-diag-title{font-family:var(--font-serif);font-weight:400;font-size:18px;color:var(--fg-strong)}
+.wheel-diag-sub{font-family:'Courier New',monospace;font-size:10px;letter-spacing:.2em;color:var(--fg-hint)}
+.wheel-diag-list{display:flex;flex-direction:column;gap:10px}
+.wheel-diag-row{display:grid;grid-template-columns:28px 1fr 80px 36px;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-soft)}
+.wheel-diag-row:last-child{border-bottom:none}
+.wd-emoji{font-size:18px;opacity:.85}
+.wd-name{font-family:var(--font-serif);font-size:14px;color:var(--fg-strong)}
+.wd-bar{height:6px;background:var(--bg-alt);border:1px solid var(--border-soft);position:relative;overflow:hidden}
+.wd-bar-fill{position:absolute;inset:0 auto 0 0;background-image:repeating-linear-gradient(90deg,currentColor 0,currentColor 4px,transparent 4px,transparent 6px);color:var(--accent-warm)}
+.wd-bar-fill.warn{color:#C97A6E}.wd-bar-fill.mid{color:var(--accent-warm)}.wd-bar-fill.good{color:var(--c-still-blue)}
+.wd-status{font-family:'Courier New',monospace;font-size:10px;text-align:center;letter-spacing:.06em}
+.wd-status.ok{color:var(--c-still-blue)}.wd-status.dim{color:var(--accent-warm)}.wd-status.alert{color:#C97A6E}
+.actions-section{margin-bottom:48px}
+.actions-title{font-family:var(--font-serif);font-weight:400;font-size:22px;color:var(--fg-strong);margin-bottom:8px}
+.actions-title em{font-family:var(--font-italic);font-style:italic;color:var(--accent-warm)}
+.actions-sub{font-size:14px;color:var(--fg-soft);line-height:1.85;margin-bottom:28px;max-width:560px}
+.actions-list{display:flex;flex-direction:column;gap:14px}
+.action-card{display:flex;gap:18px;padding:24px 26px;background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);transition:all .25s var(--ease-soft)}
+.action-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.action-num{flex-shrink:0;font-family:var(--font-italic);font-style:italic;font-weight:400;font-size:28px;color:var(--accent-warm);line-height:1;width:36px}
+.action-body{flex:1}
+.action-h{font-family:var(--font-serif);font-weight:400;font-size:16px;color:var(--fg-strong);margin-bottom:8px}
+.action-h .action-emoji{margin-right:8px;opacity:.85}
+.action-p{font-size:14px;line-height:1.85;color:var(--fg-soft)}
+.closing-band{text-align:center;padding:48px 24px;background:var(--c-deep-ink);color:var(--fg-on-dark);border-radius:var(--r-lg);margin-bottom:32px}
+.closing-eyebrow{font-family:'Courier New',monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent-glow);margin-bottom:18px}
+.closing-q{font-family:var(--font-italic);font-style:italic;font-weight:300;font-size:clamp(19px,2.6vw,25px);line-height:1.6;color:var(--fg-on-dark);max-width:480px;margin:0 auto 28px}
+.closing-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.closing-band .btn-warm{background:var(--accent-warm)}
+.closing-band .btn-ghost{color:var(--fg-on-dark);border-color:rgba(245,239,224,.4)}
+.closing-band .btn-ghost:hover{background:rgba(245,239,224,.08);border-color:var(--fg-on-dark)}
+.foot{text-align:center;font-size:12px;color:var(--fg-hint);letter-spacing:.14em;margin-top:32px}
+.foot strong{font-family:var(--font-serif);font-weight:400;letter-spacing:.22em;color:var(--fg-soft)}
+.stage-flash{position:fixed;inset:0;background:var(--c-warm-sand);z-index:200;pointer-events:none;opacity:0;display:flex;align-items:center;justify-content:center;font-family:'Courier New',monospace;font-size:14px;letter-spacing:.3em;color:var(--accent-warm);text-transform:uppercase;font-weight:700}
+.stage-flash.show{animation:flash-in 1.05s var(--ease-soft)}
+@keyframes flash-in{0%{opacity:0}20%{opacity:1}80%{opacity:1}100%{opacity:0}}
+@media(max-width:640px){
+  /* ── 整體佈局 ── */
+  main{padding:20px 16px 100px}
+  .topbar-inner{height:52px;padding:0 18px}
+  .brand{font-size:13px;letter-spacing:.18em}
+
+  /* ── 首頁 ── */
+  .pixel-tag{font-size:10px;padding:6px 11px;margin-bottom:18px}
+  .intro-title{font-size:clamp(26px,7vw,36px);margin-bottom:16px}
+  .intro-lede{font-size:15px;line-height:1.85;margin-bottom:16px}
+  .wheel-preview{padding:18px 14px;margin:16px 0 24px}
+  .wheel-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .wheel-cell{padding:12px 6px}
+  .wheel-cell-emoji{font-size:18px}
+  .btn-row{flex-direction:column;align-items:stretch}
+  .btn-start{padding:14px 24px;font-size:13px;letter-spacing:.16em}
+
+  /* ── 題目分頁 ── */
+  .stage-hud{grid-template-columns:1fr;padding:14px 16px;margin-bottom:24px}
+  .stage-pips{gap:3px}
+  .stage-pip{width:11px;height:11px}
+  .stage-header{margin-bottom:22px}
+  .stage-header-emoji{font-size:28px;margin-bottom:10px}
+  .stage-tag{font-size:9px;padding:3px 8px;margin-bottom:10px}
+  .stage-theme{font-size:clamp(20px,5vw,26px);margin-bottom:10px}
+
+  /* ── 選項卡片（觸控優化）── */
+  .q-list{gap:10px;margin-bottom:28px}
+  .q-card{padding:16px 14px;gap:12px}
+  .q-card:active{transform:scale(.98);box-shadow:var(--shadow-sm)}
+  .q-card:hover{transform:none}
+  .q-radio{width:22px;height:22px;margin-top:1px}
+  .q-radio-dot{width:9px;height:9px}
+  .q-label{font-size:9px;letter-spacing:.14em;margin-bottom:4px}
+  .q-text{font-size:14px;line-height:1.7}
+  .q-emoji-badge{font-size:15px}
+
+  /* ── 題目導航（三件事不擠） ── */
+  .stage-nav{
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    gap:8px;
+    margin-top:24px;
+    padding-top:20px;
+    align-items:center;
+  }
+  .stage-nav-hint{font-size:10px;letter-spacing:.06em;text-align:center}
+  .stage-nav .btn{padding:12px 14px;font-size:12px;min-height:44px;letter-spacing:.08em}
+  .stage-nav .btn-quiet{padding:10px 8px;font-size:12px}
+
+  /* ── 結果頁 ── */
+  .victory-banner{padding:24px 16px;margin-bottom:20px}
+  .victory-emoji{font-size:52px}
+  .victory-title{font-size:clamp(22px,5vw,28px)}
+
+  .char-card{grid-template-columns:1fr;gap:16px;padding:20px 18px;text-align:center;margin-bottom:20px}
+  .char-portrait{width:100px;height:100px;font-size:42px;margin:0 auto}
+  .char-info{align-items:center}
+  .char-name{font-size:20px}
+  .stats{width:100%}
+  .stat-row{grid-template-columns:60px 1fr 24px;gap:8px}
+
+  .result-message{padding:20px 18px;margin-bottom:32px}
+  .result-message-body{font-size:14px;line-height:1.9}
+
+  .wheel-diag{padding:18px 14px;margin-bottom:32px}
+  .wheel-diag-title{font-size:15px}
+  .wheel-diag-sub{font-size:9px;line-height:1.6}
+  #pie-grid{grid-template-columns:repeat(2,1fr) !important;gap:10px}
+
+  .actions-section{margin-bottom:32px}
+  .actions-title{font-size:19px}
+  .actions-sub{font-size:13px;margin-bottom:20px}
+  .actions-list{gap:10px}
+  .action-card{padding:16px 14px;gap:12px}
+  .action-card:hover{transform:none}
+  .action-card:active{transform:scale(.99)}
+  .action-num{font-size:22px;width:28px}
+  .action-h{font-size:14px;margin-bottom:6px}
+  .action-p{font-size:13px;line-height:1.8}
+
+  .closing-band{padding:32px 18px;margin-bottom:24px}
+  .closing-q{font-size:17px;margin-bottom:20px}
+  .closing-band #share-line-btn{max-width:100%}
+  .closing-band>div:last-of-type{flex-direction:column;align-items:stretch}
+  .closing-band>div:last-of-type .btn{width:100%;justify-content:center}
+}
+
+/* ── 中斷點：平板橫向 ── */
+@media(min-width:641px) and (max-width:900px){
+  main{padding:48px 28px 100px}
+  #pie-grid{grid-template-columns:repeat(4,1fr) !important}
+}
+@media(min-width:901px){
+  #pie-grid{grid-template-columns:repeat(4,1fr) !important}
+}
+
+/* ── 觸控設備：取消 hover 動畫避免殘留 ── */
+@media(hover:none) and (pointer:coarse){
+  .q-card:hover{transform:none;box-shadow:var(--shadow-sm);border-color:var(--border-soft)}
+  .q-card.selected:hover{border-color:var(--accent-warm);box-shadow:var(--shadow-warm)}
+  .btn:hover{transform:none;box-shadow:none}
+  .action-card:hover{transform:none;box-shadow:var(--shadow-sm)}
+  .btn-warm:hover{background:var(--accent-warm)}
+}
+a{color:var(--accent);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="bg-wash" aria-hidden="true">
+  <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+    <defs><filter id="soft-blur"><feGaussianBlur stdDeviation="60"/></filter></defs>
+    <g filter="url(#soft-blur)" opacity=".55">
+      <ellipse cx="200" cy="180" rx="280" ry="200" fill="#D6E4F0"/>
+      <ellipse cx="1280" cy="220" rx="320" ry="220" fill="#E8D5C4"/>
+      <ellipse cx="320" cy="780" rx="260" ry="180" fill="#E8D5C4" opacity=".7"/>
+      <ellipse cx="1180" cy="760" rx="280" ry="200" fill="#D6E4F0" opacity=".75"/>
+    </g>
+  </svg>
+</div>
+<svg class="bg-rings" viewBox="0 0 1400 1400" aria-hidden="true">
+  <g fill="none" stroke="#C9B99A" stroke-width="1" opacity=".18">
+    <circle cx="700" cy="700" r="320"/><circle cx="700" cy="700" r="450"/>
+    <circle cx="700" cy="700" r="580"/><circle cx="700" cy="700" r="690"/>
+  </g>
+</svg>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#">微光前行</a>
+
+  </div>
+</header>
+<div class="stage-flash" id="stage-flash" aria-hidden="true">✦ 繼續前行 ✦</div>
+
+<!-- 截圖提示 toast -->
+<div id="share-toast" style="position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);z-index:300;background:var(--c-deep-ink);color:var(--fg-on-dark);padding:18px 28px;border-radius:16px;font-size:14px;line-height:1.8;text-align:center;max-width:320px;width:90%;box-shadow:0 8px 32px rgba(61,61,61,.25);transition:transform .35s cubic-bezier(.16,1,.3,1),opacity .35s;opacity:0;pointer-events:none">
+  🌟 <strong>覺得有幫助？</strong><br>
+  <span style="font-size:13px;color:rgba(245,239,224,.75)">歡迎分享出去，邀請更多朋友來玩！</span>
+</div>
+
+<main>
+  <!-- ═══ INTRO ═══ -->
+  <section class="screen active" id="screen-intro">
+    <div class="pixel-tag"><span class="blink"></span>PRESS START</div>
+    <span class="eyebrow">Life Wheel · 生命之輪能量檢測</span>
+    <h1 class="intro-title">用 8 個人生主題，<br>看見你此刻的<em>內在狀態</em></h1>
+    <p class="intro-lede">
+      這是一份為感受細膩、容易想太多的你設計的能量檢測。<br>
+      我們把你的人生攤開成 8 個主題，<br>
+      陪你誠實地看見此刻的自己。
+    </p>
+    <div class="wheel-preview">
+      <div class="wheel-preview-title">本次檢測的 8 個人生主題</div>
+      <div class="wheel-grid">
+        <div class="wheel-cell"><div class="wheel-cell-emoji">💼</div><div class="wheel-cell-label">事業</div></div>
+        <div class="wheel-cell"><div class="wheel-cell-emoji">💰</div><div class="wheel-cell-label">財富</div></div>
+        <div class="wheel-cell"><div class="wheel-cell-emoji">💪</div><div class="wheel-cell-label">健康</div></div>
+        <div class="wheel-cell"><div class="wheel-cell-emoji">👨‍👩‍👧</div><div class="wheel-cell-label">家庭</div></div>
+        <div class="wheel-cell"><div class="wheel-cell-emoji">💕</div><div class="wheel-cell-label">感情</div></div>
+        <div class="wheel-cell"><div class="wheel-cell-emoji">🌱</div><div class="wheel-cell-label">成長</div></div>
+        <div class="wheel-cell"><div class="wheel-cell-emoji">🎉</div><div class="wheel-cell-label">休閒</div></div>
+        <div class="wheel-cell"><div class="wheel-cell-emoji">🌿</div><div class="wheel-cell-label">心靈</div></div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-start" id="start-btn">▶ 開始檢測</button>
+    </div>
+  </section>
+
+  <div id="stages-mount"></div>
+
+  <!-- ═══ RESULT ═══ -->
+  <section class="screen" id="screen-result">
+    <div class="result-hero">
+      <div class="victory-banner">
+        <div class="victory-tag">✦ 檢測完成 ✦</div>
+        <div class="victory-emoji" id="victory-emoji">✨</div>
+        <h2 class="victory-title">你的能量角色 — <em id="victory-title-em">微光騎士</em></h2>
+        <div class="victory-sub" id="victory-sub">— Glimmer Knight —</div>
+      </div>
+      <div class="char-card">
+        <div class="char-portrait"><span class="char-portrait-emoji" id="char-portrait-emoji">🛡️</span></div>
+        <div class="char-info">
+          <div class="char-class" id="char-class">能量狀態</div>
+          <div class="char-name" id="char-name">微光<em>騎士</em></div>
+          <div class="char-tag" id="char-tag">能量充足，防禦力強。</div>
+          <div class="stats" id="stats"></div>
+        </div>
+      </div>
+      <div class="result-message">
+        <p class="result-message-body" id="result-message-body"></p>
+      </div>
+    </div>
+    <div class="wheel-diag">
+      <div class="wheel-diag-head">
+        <div class="wheel-diag-title">生命之輪 · 各主題能量診斷</div>
+        <div class="wheel-diag-sub">僅供參考，不構成任何醫療與心理健康程度建議</div>
+      </div>
+      <!-- 圓餅圖區 -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;padding:8px 0" id="pie-grid"></div>
+    </div>
+    <div class="actions-section">
+      <span class="eyebrow">Gentle Actions · 此刻就能做的事</span>
+      <h3 class="actions-title">給此刻的你，<em>三件溫柔的小事</em></h3>
+      <p class="actions-sub">不需要全部都做，只要從最有共鳴的那一件開始。<br>療癒，從不是一場馬拉松，而是一個又一個願意停下來的瞬間。</p>
+      <div class="actions-list" id="actions-list"></div>
+    </div>
+    <div class="closing-band">
+      <p class="closing-eyebrow">A Gentle Reminder</p>
+      <p class="closing-q">「生命的改變總是悄悄地發生在，<br>下定決心、並且刻意朝向的那一刻。」</p>
+
+      <!-- 迷你角色卡 -->
+      <div id="role-card" style="margin:0 auto 28px;max-width:320px;background:rgba(245,239,224,.08);border:1px solid rgba(245,239,224,.18);border-radius:20px;padding:24px 20px;text-align:center">
+        <div id="ig-role-emoji" style="font-size:52px;line-height:1;margin-bottom:12px">🌅</div>
+        <div style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:.22em;color:rgba(245,239,224,.5);margin-bottom:6px;text-transform:uppercase">我的能量角色</div>
+        <div id="ig-role-display" style="font-family:var(--font-serif);font-size:22px;font-weight:400;color:var(--fg-on-dark);margin-bottom:10px">晨光人</div>
+        <div id="ig-role-tag" style="font-family:var(--font-serif);font-style:italic;font-size:13px;color:rgba(245,239,224,.65);line-height:1.7">此刻的你，輕盈而飽滿，<br>像清晨的第一道光。</div>
+      </div>
+
+      <!-- 主要行動 -->
+      <button class="btn btn-warm" id="share-line-btn" style="width:100%;max-width:360px;font-size:15px;padding:16px;margin-bottom:16px">
+        📸 截圖分享 — 讓朋友也來測測看！
+      </button>
+
+      <!-- 次要行動 -->
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-ghost" id="restart" style="font-size:13px;padding:10px 20px;min-height:40px">↺ 重新檢測</button>
+        <a href="https://www.instagram.com/sharon.coaching_/" target="_blank" rel="noopener" class="btn btn-ghost" style="font-size:13px;padding:10px 20px;min-height:40px;color:var(--fg-on-dark);border-color:rgba(245,239,224,.4)">追蹤 Sharon IG</a>
+      </div>
+    </div>
+    <p class="foot"><strong>微光前行</strong><br>在迷霧裡，陪你看見更多元的生涯選擇</p>
+  </section>
+</main>
+
+<script>
+(function(){
+
+// ── 8 stages × 4 questions each ──────────────────────────────────────────────
+// Each question has: text (situation), label (short tag), emoji
+// Questions are single-choice; score is the index chosen (0-3, 0=lightest, 3=heaviest drain)
+
+const STAGES = [
+  {
+    n:1, emoji:'💼', name:'事業', nameEn:'CAREER',
+    theme:'在工作中，你還記得自己<em>真正的樣子</em>嗎？',
+    hint:'從每天的通勤到例行會議——你是被推著前進，還是仍能感覺到自己對工作的呼吸？',
+    questions:[
+      {emoji:'🌅', label:'充滿動力', text:'工作讓我有成就感，即使忙碌也覺得有意義。'},
+      {emoji:'😌', label:'尚可維持', text:'大部分時間還好，偶爾覺得有點無聊或疲乏。'},
+      {emoji:'🤖', label:'機器人模式', text:'感覺自己像在自動駕駛，對工作提不起任何熱情。'},
+      {emoji:'😶‍🌫️', label:'我快撐不住了', text:'每天上班像在消耗生命，認真懷疑這份工作還適不適合自己。'},
+    ]
+  },
+  {
+    n:2, emoji:'💰', name:'財富', nameEn:'WEALTH',
+    theme:'金錢，是你的<em>翅膀</em>，還是無形的鎖鏈？',
+    hint:'安全感與金錢，常常糾纏成同一個結。試著輕輕看見它們真實的樣子。',
+    questions:[
+      {emoji:'🌱', label:'還算安心', text:'對目前的財務狀況大致滿意，有基本的安全感。'},
+      {emoji:'🪙', label:'有點焦慮', text:'有緊急預備金，但仍時常擔心不夠用。'},
+      {emoji:'😰', label:'金錢讓我恐慌', text:'財務壓力讓我夜裡難以入睡，甚至影響了日常決定。'},
+      {emoji:'🔗', label:'被金錢綁住了', text:'明明不快樂，卻因為薪水或穩定不敢離開，感覺被困住。'},
+    ]
+  },
+  {
+    n:3, emoji:'💪', name:'健康', nameEn:'HEALTH',
+    theme:'身體，是<em>最誠實的</em>那個朋友。',
+    hint:'當心還在忍耐，身體往往已經先輕聲地舉起了手。',
+    questions:[
+      {emoji:'✨', label:'身心都還不錯', text:'作息大致穩定，身體沒有特別的警訊，偶爾累但休息後能恢復。'},
+      {emoji:'🌒', label:'身體有點緊繃', text:'肩頸偶爾緊繃，睡眠品質時好時壞，感覺需要多休息。'},
+      {emoji:'🌀', label:'腦袋停不下來', text:'即使躺下也難以放空，腦袋持續轉動，很久沒有真正放鬆的感覺了。'},
+      {emoji:'🆘', label:'身體在求救', text:'失眠、身體各種緊繃或疼痛已經持續一段時間，自己都在硬撐。'},
+    ]
+  },
+  {
+    n:4, emoji:'👨‍👩‍👧', name:'家庭', nameEn:'FAMILY',
+    theme:'在最親近的人面前，你<em>還能做自己</em>嗎？',
+    hint:'家，本應是補血的客棧，但有時也會悄悄消耗一份份未被看見的感受。',
+    questions:[
+      {emoji:'🏡', label:'家是我的充電站', text:'和家人相處大多讓我感到溫暖或放鬆，偶有摩擦但整體還好。'},
+      {emoji:'🤐', label:'我常常隱藏自己', text:'在家人面前習慣壓抑自己的感受，不想製造麻煩或引發衝突。'},
+      {emoji:'🪣', label:'我是情緒垃圾桶', text:'常常聽別人傾訴，卻沒有人問過我還好嗎，每次都耗盡了能量。'},
+      {emoji:'🫥', label:'家讓我更疲憊', text:'回家不是充電，而是另一種消耗，很渴望有一個屬於自己的空間。'},
+    ]
+  },
+  {
+    n:5, emoji:'💕', name:'感情', nameEn:'LOVE',
+    theme:'在親密關係裡，你是<em>被看見的</em>，還是默默配合？',
+    hint:'感情這一格，常常是高敏的你最先犧牲、也最後才願意誠實看見的地方。',
+    questions:[
+      {emoji:'💞', label:'感覺被愛著', text:'在伴侶或重要的人面前，我能自在表達感受，也感覺被接住。'},
+      {emoji:'🐚', label:'不太敢說真心話', text:'有時想說的話到嘴邊又縮回去，怕對方不理解或引起爭執。'},
+      {emoji:'🎭', label:'我一直在配合對方', text:'在關係裡總是配合、委屈自己，卻不確定自己真正需要什麼。'},
+      {emoji:'🌫️', label:'孤獨感很重', text:'即使有伴或身邊有人，仍常常感到深深的孤獨，沒有人真的懂我。'},
+    ]
+  },
+  {
+    n:6, emoji:'🌱', name:'成長', nameEn:'GROWTH',
+    theme:'現在生活中，還有讓你感到好奇、<em>想學習的事物</em>嗎？',
+    hint:'個人成長不是新的進度條，而是一段「你是否還對自己感到好奇」的關係。',
+    questions:[
+      {emoji:'🔥', label:'還在燃燒中', text:'對學習、探索新事物仍然有熱情，感覺自己在慢慢往前走。'},
+      {emoji:'🪶', label:'動力有點低落', text:'以前喜歡的事最近提不太起勁，不確定自己現在真正想要什麼。'},
+      {emoji:'🌫️', label:'不配得感很重', text:'常覺得自己沒有一技之長，焦慮自己比別人落後太多。'},
+      {emoji:'🧊', label:'內心像凍住了', text:'對未來感到茫然，好像不管做什麼都不會讓自己更好，有點麻木。'},
+    ]
+  },
+  {
+    n:7, emoji:'🎉', name:'休閒', nameEn:'LEISURE',
+    theme:'在熱鬧的人群裡，你是被<em>充電</em>，還是被<em>消耗</em>？',
+    hint:'社群、聚會、群組——這些原本應該帶來連結的事，最近還讓你感到放鬆嗎？',
+    questions:[
+      {emoji:'🎈', label:'社交讓我充電', text:'和朋友相處、參加聚會，整體上讓我感到快樂或放鬆。'},
+      {emoji:'🫧', label:'人多讓我有點累', text:'喜歡小圈子聚會，但大型社交場合或群組訊息常讓我不知所措。'},
+      {emoji:'🛋️', label:'我越來越想宅著', text:'取消聚會比赴約更讓我如釋重負，對社交的期待越來越低。'},
+      {emoji:'📵', label:'想從一切消失', text:'非常渴望徹底消失一段時間，不想被任何群組或通知找到。'},
+    ]
+  },
+  {
+    n:8, emoji:'🌿', name:'心靈', nameEn:'SPIRIT',
+    theme:'撕掉所有頭銜後，你<em>認得自己</em>嗎？',
+    hint:'心靈這一格，是所有面向的根。願你在這裡，被自己最溫柔地對待。',
+    questions:[
+      {emoji:'🌟', label:'我還認得自己', text:'不管外在環境如何，我仍然知道自己重視什麼、想要往哪裡去。'},
+      {emoji:'🎭', label:'頭銜給了我安全感', text:'職稱或公司光環讓我感到踏實，但偶爾想，少了這些我還剩什麼？'},
+      {emoji:'🌑', label:'我快認不得自己了', text:'不確定自己真正喜歡什麼，感覺一直在配合別人的期待活著。'},
+      {emoji:'💀', label:'我好像消失了', text:'靈魂空了一大塊，對於「我是誰、我想要什麼」完全沒有答案。'},
+    ]
+  }
+];
+
+// ── Build stage screens ────────────────────────────────────────────────────────
+const mount = document.getElementById('stages-mount');
+STAGES.forEach((s, i) => {
+  const stageNum = i + 1;
+  const isLast = stageNum === STAGES.length;
+  const screen = document.createElement('section');
+  screen.className = 'screen';
+  screen.id = `screen-stage-${stageNum}`;
+  screen.dataset.stage = stageNum;
+
+  let pips = '';
+  for (let k = 1; k <= STAGES.length; k++) {
+    const cls = k < stageNum ? 'done' : (k === stageNum ? 'current' : '');
+    pips += `<div class="stage-pip ${cls}"></div>`;
+  }
+
+  let qHTML = '';
+  s.questions.forEach((q, qi) => {
+    qHTML += `
+      <label class="q-card" data-qi="${qi}">
+        <span class="q-radio"><span class="q-radio-dot"></span></span>
+        <input type="radio" name="stage-${stageNum}" value="${qi}" hidden>
+        <div class="q-body">
+          <div class="q-label"><span class="q-emoji-badge">${q.emoji}</span>${q.label}</div>
+          <p class="q-text">${q.text}</p>
+        </div>
+      </label>`;
+  });
+
+  screen.innerHTML = `
+    <div class="stage-hud">
+      <div class="stage-hud-row">
+        <span class="stage-hud-label">主題</span>
+        <span class="stage-hud-value">0${stageNum} ／ 08</span>
+        <span class="stage-hud-value" style="margin-left:6px">${s.emoji}</span>
+      </div>
+      <div class="stage-pips">${pips}</div>
+    </div>
+    <div class="stage-header">
+      <div class="stage-header-emoji">${s.emoji}</div>
+      <div class="stage-tag">主題 ${String(stageNum).padStart(2,'0')} · ${s.name}</div>
+      <h2 class="stage-theme">${s.theme}</h2>
+      <p class="stage-hint">${s.hint}</p>
+    </div>
+    <div class="q-list">${qHTML}</div>
+    <div class="stage-nav">
+      <button class="btn btn-quiet" data-back>← 上一題</button>
+      <span class="stage-nav-hint">請選擇最符合你目前狀態的描述</span>
+      <button class="btn btn-warm" data-next>${isLast ? '看見此刻的我 ✦' : '下一題 →'}</button>
+    </div>`;
+  mount.appendChild(screen);
+});
+
+// ── Screen flow ────────────────────────────────────────────────────────────────
+const screenIds = ['screen-intro'];
+STAGES.forEach((_, i) => screenIds.push(`screen-stage-${i + 1}`));
+screenIds.push('screen-result');
+let idx = 0;
+
+// Answers: array of chosen qi per stage (null = not chosen)
+const answers = new Array(STAGES.length).fill(null);
+
+function show(i, opts = {}) {
+  idx = i;
+  screenIds.forEach((id, k) => {
+    document.getElementById(id).classList.toggle('active', k === i);
+  });
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  if (opts.flash) flash();
+}
+
+function flash() {
+  const f = document.getElementById('stage-flash');
+  f.classList.remove('show'); void f.offsetWidth; f.classList.add('show');
+}
+
+document.getElementById('start-btn').addEventListener('click', () => show(1));
+
+// ── Radio card toggle ───────────────────────────────────────────────────────────
+function bindCards() {
+  document.querySelectorAll('.q-card').forEach(card => {
+    card.addEventListener('click', e => {
+      e.preventDefault();
+      const screen = card.closest('section');
+      const stageIdx = parseInt(screen.dataset.stage) - 1;
+      const qi = parseInt(card.dataset.qi);
+      // Deselect all in this stage
+      screen.querySelectorAll('.q-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      card.querySelector('input').checked = true;
+      answers[stageIdx] = qi;
+    });
+  });
+}
+bindCards();
+
+// ── Next / Back ──────────────────────────────────────────────────────────────────
+document.querySelectorAll('[data-next]').forEach(b => {
+  b.addEventListener('click', () => {
+    // Check if answered
+    const stageIdx = idx - 1;
+    if (answers[stageIdx] === null) {
+      const hint = document.querySelector(`#screen-stage-${idx} .stage-nav-hint`);
+      hint.textContent = '⚠ 請先選擇一個最符合的選項';
+      hint.style.color = '#C97A6E';
+      setTimeout(() => { hint.textContent = '請選擇最符合你目前狀態的描述'; hint.style.color = ''; }, 2000);
+      return;
+    }
+    const last = idx === screenIds.length - 2;
+    if (last) { showResult(); } else { show(idx + 1, { flash: true }); }
+  });
+});
+document.querySelectorAll('[data-back]').forEach(b => {
+  b.addEventListener('click', () => show(Math.max(0, idx - 1)));
+});
+
+// ── 5 Tiers ─────────────────────────────────────────────────────────────────────
+// Score = sum of answers (0-3 per stage, total 0-24)
+// 0-4: 晨露使者  5-9: 微光騎士  10-14: 靜默法師  15-19: 倦鳥旅人  20-24: 夜幕行者
+
+const SHARON_CTA = {
+  emoji:'☀️',
+  h:'找 Sharon 教練聊聊',
+  p:'預約資訊請關注微光空間社群公告。<br>下一波開放報名時程：<strong>2026/05/15（四）13:00</strong><br>當日完成預約，即享期間限定優惠！',
+  isCTA: true
+};
+
+const BOOK = {
+  dawn:     { emoji:'📗', h:'充電好書推薦：《臣服實驗》', p:'Michael Singer 著。你現在狀態很好，這正是最適合「向內叩問自己」的時機。這本書不是要你做什麼，而是邀請你思考：如果你停止控制生命的走向，把主導權還給宇宙，會發生什麼？能量充沛時讀它，你會看見一個截然不同的生命視角。', isBook:true, url:'https://www.books.com.tw/products/0010870627' },
+  knight:   { emoji:'📘', h:'充電好書推薦：《僧人心態》', p:'Jay Shetty 著。你還撐得住，但有些事情開始讓你分心、讓你懷疑。這本書幫助你重新找回「什麼對我真正重要」的清晰感——在能量還算穩定的此刻，把握機會吧！', isBook:true, url:'https://www.books.com.tw/products/0010870627' },
+  mage:     { emoji:'📙', h:'充電好書推薦：《Rewire 神經可塑性》', p:'Nicole Vignola 著。你已經知道自己陷在某些慣性裡，卻不知道怎麼出去。這本書從神經科學告訴你：那不是你的個性問題，是大腦的運作模式——而大腦是可以被重新訓練的。你不是改不了，只是還沒用對方法。', isBook:true, url:'https://www.books.com.tw/products/0010990062' },
+  traveler: { emoji:'📕', h:'充電好書推薦：《當下的力量》', p:'Eckhart Tolle 著。你已經累到不想再思考未來。這本書只請你做一件事：停下來，感受此刻。不回顧昨天，不規劃明天，就只是讓自己存在於這一秒。當一切都太重，「活在當下」是最輕的那條路。', isBook:true, url:'https://www.books.com.tw/products/0010870627' },
+  night:    { emoji:'📒', h:'充電好書推薦：《你就是困住自己的那座山》', p:'Brianna Wiest 著。在最黑暗的時候，你不需要被鼓勵，你需要被理解。這本書不催你振作、不告訴你「你可以的」，它只是靜靜陪你看見：那些反覆困住你的，其實是你還沒意識到的信念。看見它，就是鬆動它的開始。', isBook:true, url:'https://www.books.com.tw/products/0011044302' }
+};
+
+const TIERS = [
+  {
+    key:'dawn', portrait:'🌅', victoryEmoji:'🌅',
+    titleEm:'晨光人', sub:'— DAWN · LV.RADIANT —',
+    cls:'能量狀態：綻放中',
+    nameHTML:'晨光<em>人</em>',
+    tag:'此刻的你，輕盈而飽滿，像清晨的第一道光。',
+    body:'你的能量此刻正處於一個相對滋養的狀態。<br>這不是理所當然——這是你長期善待自己的成果。<br>請繼續保有這份覺察，並在日常裡找到讓能量流動的出口。',
+    stats:{ '覺察力': 92, '內在平靜': 88, '能量儲量': 90 },
+    statClass:'high',
+    actions:[
+      {emoji:'🌱',h:'把能量分享出去',p:'找一個你信任的人，問他：「你最近還好嗎？」有時候，能量充足的人能給予他人一個被接住的機會——而這也會讓自己的能量流動得更豐沛。'},
+      BOOK.dawn,
+      {emoji:'✨',h:'想繼續深化這個狀態？',p:'能量好的時候，正是往前走的最佳時機。Sharon 的教練陪伴服務可以幫助你把這份清明，轉化為打造符合天賦的副業、實現多元收入的具體行動。<br>下一波開放報名：<strong>2026/05/15（四）13:00</strong>，關注微光空間社群掌握資訊。',isSoftCTA:true}
+    ]
+  },
+  {
+    key:'knight', portrait:'🌤️', victoryEmoji:'🌤️',
+    titleEm:'微光人', sub:'— GLIMMER · LV.STEADY —',
+    cls:'能量狀態：穩健中',
+    nameHTML:'微光<em>人</em>',
+    tag:'還好，只是有些累了。繼續走，但別忘了照顧自己。',
+    body:'你的能量目前還算穩定，做得不錯喔！希望可以繼續維持，也別忘了在日常裡，多預留一些「沒有目的」的時間給自己。',
+    stats:{ '覺察力': 75, '內在平靜': 68, '能量儲量': 72 },
+    statClass:'high',
+    actions:[
+      {emoji:'🫁',h:'三分鐘的身體掃描',p:'閉上眼睛，從頭頂慢慢往下，感受身體哪裡是緊的、哪裡是鬆的。不需要改變什麼，只是「看見」。這個動作會讓神經系統知道：我有被自己注意到了。'},
+      BOOK.knight,
+      {emoji:'✨',h:'想在穩定中繼續往前？',p:'趁現在狀態還好，Sharon 的教練陪伴服務可以幫助你釐清具體人生卡關方向，活得更自在。<br>下一波開放報名：<strong>2026/05/15（四）13:00</strong>，關注微光空間社群掌握資訊。',isSoftCTA:true}
+    ]
+  },
+  {
+    key:'mage', portrait:'🌫️', victoryEmoji:'🌫️',
+    titleEm:'霧中人', sub:'— MIST · LV.RECHARGE —',
+    cls:'能量狀態：需要補充',
+    nameHTML:'霧中<em>人</em>',
+    tag:'內在電池已開始亮起黃燈，辛苦了。',
+    body:'你的內在電池正在發出橘黃色的警示燈。<br>許多時候你仍能正常運作，但那是用「意志力」在撐，而不是被能量推著走。<br>這個階段最重要的，不是再多做一點，而是學會合理地「不做」。',
+    stats:{ '覺察力': 58, '內在平靜': 42, '能量儲量': 50 },
+    statClass:'mid',
+    actions:[
+      {emoji:'🛡️',h:'劃定一道能量界線',p:'這週選一件「以為自己應該做、但其實不想做」的事，溫柔地說不。可以是一場聚會、一個訊息、一個社群動態。把那段時間還給自己，無需任何理由。'},
+      BOOK.mage,
+      {emoji:'☀️', h:'找 Sharon 教練聊聊',
+       p:'Sharon 的教練陪伴服務可以幫助你找到當下困境的根源，重新設定優先順序，讓能量用在刀口上。<br>下一波開放報名：<strong>2026/05/15（四）13:00</strong><br>當日完成預約，即享期間限定優惠！', isCTA:true}
+    ]
+  },
+  {
+    key:'traveler', portrait:'🌒', victoryEmoji:'🌒',
+    titleEm:'疲憊人', sub:'— WEARY · LV.REST —',
+    cls:'能量狀態：需要停下來',
+    nameHTML:'疲憊<em>人</em>',
+    tag:'走了很遠、扛了很多——現在最該做的，是好好停下來歇一歇。',
+    body:'請允許自己「停下來」，而不是內疚。<br>你的身體、神經系統、甚至靈魂，都在用最後的力氣告訴你：是時候被認真地照顧了。<br>你的存在本身，就有價值，與你完成多少、賺了多少，無關。',
+    stats:{ '覺察力': 35, '內在平靜': 25, '能量儲量': 28 },
+    statClass:'low',
+    actions:[
+      {emoji:'🚨',h:'今天就按下暫停鍵',p:'不要等「忙完這一波」。在接下來 24 小時內，至少取消、推遲或縮短一個非緊急的行程。把那段時間留給「什麼都不做」——這是對自己最重要的尊重。'},
+      BOOK.traveler,
+      {emoji:'☀️', h:'找 Sharon 教練聊聊',
+       p:'Sharon 的教練陪伴服務可以幫助你從內耗中抽身，活得更灑脫、快樂，實現身心平衡。<br>下一波開放報名：<strong>2026/05/15（四）13:00</strong><br>當日完成預約，即享期間限定優惠！', isCTA:true}
+    ]
+  },
+  {
+    key:'night', portrait:'🌑', victoryEmoji:'🌑',
+    titleEm:'夜行人', sub:'— NIGHT · LV.RESTORE —',
+    cls:'能量狀態：需要被接住',
+    nameHTML:'夜行<em>人</em>',
+    tag:'此刻的你在霧裡獨行——你不需要假裝還好。',
+    body:'你在這份檢測裡的每一個選擇，都是一種誠實。<br>那是需要很大勇氣的事。<br>這個時刻，最重要的不是找到答案，而是讓自己被接住。<br>你不需要獨自撐過這段夜路。',
+    stats:{ '覺察力': 18, '內在平靜': 12, '能量儲量': 15 },
+    statClass:'low',
+    actions:[
+      {emoji:'🌿',h:'重建一個照顧自己的儀式',p:'今天不要要求自己「好起來」。只做一件事：例如每晚睡前喝一杯溫水，慢慢地喝，感受它進入身體的溫度。把這個動作當作：我願意好好對待自己。'},
+      BOOK.night,
+      {emoji:'☀️', h:'找 Sharon 教練聊聊',
+       p:'在最低潮的時候，你需要的不是建議，而是一個安全的陪伴空間。Sharon 的教練陪伴服務，陪你在這段夜路上被真正接住。<br>下一波開放報名：<strong>2026/05/15（四）13:00</strong><br>當日完成預約，即享期間限定優惠！', isCTA:true}
+    ]
+  }
+];
+
+function tierFor(score) {
+  if (score <= 4) return TIERS[0];
+  if (score <= 9) return TIERS[1];
+  if (score <= 14) return TIERS[2];
+  if (score <= 19) return TIERS[3];
+  return TIERS[4];
+}
+
+function facetStatus(score, stageIdx) {
+  const naturalPct = [98, 90, 95, 92, 88, 96, 93, 91];
+  if (score === 0) return { cls:'good', label:'充足', status:'ok', pct: naturalPct[stageIdx % 8] };
+  if (score === 1) return { cls:'mid', label:'尚可', status:'dim', pct:65 };
+  if (score === 2) return { cls:'warn', label:'偏低', status:'dim', pct:35 };
+  return { cls:'warn', label:'需補充', status:'alert', pct:15 };
+}
+
+let currentTier = null;
+
+function showResult() {
+  const totalScore = answers.reduce((sum, a) => sum + (a || 0), 0);
+  const tier = tierFor(totalScore);
+  currentTier = tier;
+
+  document.getElementById('victory-emoji').textContent = tier.victoryEmoji;
+  document.getElementById('victory-title-em').textContent = tier.titleEm;
+  document.getElementById('victory-sub').textContent = tier.sub;
+  document.getElementById('char-portrait-emoji').textContent = tier.portrait;
+  document.getElementById('char-class').textContent = tier.cls;
+  document.getElementById('char-name').innerHTML = tier.nameHTML;
+  document.getElementById('char-tag').textContent = tier.tag;
+  document.getElementById('result-message-body').innerHTML = tier.body;
+  const igRole = document.getElementById('ig-role-display');
+  const igEmoji = document.getElementById('ig-role-emoji');
+  const igTag = document.getElementById('ig-role-tag');
+  if (igRole) igRole.textContent = tier.titleEm;
+  if (igEmoji) igEmoji.textContent = tier.victoryEmoji;
+  if (igTag) igTag.innerHTML = tier.tag.replace('，', '，<br>');
+
+  const stats = document.getElementById('stats');
+  stats.innerHTML = '';
+  Object.entries(tier.stats).forEach(([k, v]) => {
+    stats.innerHTML += `
+      <div class="stat-row">
+        <div class="stat-label">${k}</div>
+        <div class="stat-bar"><div class="stat-fill ${tier.statClass}" style="width:${v}%"></div></div>
+        <div class="stat-num">${v}</div>
+      </div>`;
+  });
+
+  // ── 圓餅圖診斷 ────────────────────────────────────────────────────────────────
+  const pieColors = { good:'#8EAFC7', mid:'#C9B99A', warn:'#C97A6E' };
+  const pieLabels = { good:'充足', mid:'尚可', warn:'偏低' };
+  const grid = document.getElementById('pie-grid');
+  grid.innerHTML = '';
+  STAGES.forEach((s, i) => {
+    const score = answers[i] || 0;
+    const fs = facetStatus(score, i);
+    const filled = fs.pct;
+    const empty = 100 - filled;
+    const color = pieColors[fs.cls];
+    const r = 28, cx = 36, cy = 36, circ = 2 * Math.PI * r;
+    const filledDash = (filled / 100) * circ;
+    const emptyDash = circ - filledDash;
+    const cell = document.createElement('div');
+    cell.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 8px;background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;';
+    cell.innerHTML = `
+      <svg width="72" height="72" viewBox="0 0 72 72" role="img" aria-label="${s.name}能量${pieLabels[fs.cls]}">
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--bg-alt)" stroke-width="9"/>
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="9"
+          stroke-dasharray="${filledDash} ${emptyDash}"
+          stroke-dashoffset="${circ * 0.25}"
+          stroke-linecap="round"/>
+        <text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="18" dominant-baseline="middle">${s.emoji}</text>
+        <text x="${cx}" y="${cy + 14}" text-anchor="middle" font-size="10" fill="${color}" font-family="'Courier New',monospace">${filled}%</text>
+      </svg>
+      <div style="font-family:var(--font-serif);font-size:12px;color:var(--fg-strong);text-align:center">${s.name}</div>
+      <div style="font-family:'Courier New',monospace;font-size:10px;color:${color};letter-spacing:.06em">${pieLabels[fs.cls]}</div>`;
+    grid.appendChild(cell);
+  });
+
+  const al = document.getElementById('actions-list');
+  al.innerHTML = '';
+  tier.actions.forEach((a, i) => {
+    const num = String(i + 1).padStart(2, '0');
+    if (a.isCTA) {
+      al.innerHTML += `
+        <div class="action-card" style="background:var(--c-deep-ink);border:none;position:relative;overflow:hidden">
+          <div style="position:absolute;top:0;right:0;background:var(--accent-warm);color:white;font-size:10px;font-family:'Courier New',monospace;letter-spacing:.12em;padding:3px 10px;border-radius:0 0 0 8px">期間限定</div>
+          <div class="action-num" style="color:var(--accent-warm)">${num}</div>
+          <div class="action-body">
+            <h4 class="action-h" style="color:var(--fg-on-dark)"><span class="action-emoji">${a.emoji}</span>${a.h}</h4>
+            <p class="action-p" style="color:rgba(245,239,224,.75)">${a.p}</p>
+          </div>
+        </div>`;
+    } else {
+      al.innerHTML += `
+        <div class="action-card">
+          <div class="action-num">${num}</div>
+          <div class="action-body">
+            <h4 class="action-h"><span class="action-emoji">${a.emoji}</span>${a.h}</h4>
+            <p class="action-p">${a.p}</p>
+          </div>
+        </div>`;
+    }
+  });
+
+  show(screenIds.length - 1, { flash: true });
+}
+
+// ── Restart ───────────────────────────────────────────────────────────────────
+document.getElementById('restart').addEventListener('click', () => {
+  answers.fill(null);
+  document.querySelectorAll('.q-card.selected').forEach(c => {
+    c.classList.remove('selected');
+    c.querySelector('input').checked = false;
+  });
+  show(0);
+});
+
+// ── Share: simple screenshot toast ───────────────────────────────────────────
+document.getElementById('share-line-btn').addEventListener('click', () => {
+  const toast = document.getElementById('share-toast');
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateX(-50%) translateY(0)';
+  toast.style.pointerEvents = 'all';
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(80px)';
+    toast.style.pointerEvents = 'none';
+  }, 4000);
+});
+
+// ── Keyboard nav ────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.target.matches('input, textarea')) return;
+  if (e.key === 'ArrowRight') {
+    if (idx === 0) { document.getElementById('start-btn').click(); return; }
+    const lastStageIdx = screenIds.length - 2;
+    if (idx >= 1 && idx <= lastStageIdx) {
+      document.querySelector(`#screen-stage-${idx} [data-next]`).click();
+    }
+  }
+  if (e.key === 'ArrowLeft' && idx > 0 && idx < screenIds.length - 1) show(idx - 1);
+});
+
+// ── Touch swipe ────────────────────────────────────────────────────────────────
+let tx = 0, ty = 0, tt = 0;
+document.addEventListener('touchstart', e => {
+  if (e.target.closest('.q-card, button, a, input, .modal')) return;
+  const t = e.changedTouches[0]; tx = t.clientX; ty = t.clientY; tt = Date.now();
+}, { passive: true });
+document.addEventListener('touchend', e => {
+  if (!tt) return;
+  const t = e.changedTouches[0];
+  const dx = t.clientX - tx, dy = t.clientY - ty, dt = Date.now() - tt;
+  tt = 0;
+  if (Math.abs(dx) > 60 && Math.abs(dy) < 50 && dt < 600) {
+    if (dx < 0 && idx === 0) document.getElementById('start-btn').click();
+    else if (dx > 0 && idx > 0 && idx < screenIds.length - 1) show(idx - 1);
+  }
+}, { passive: true });
+
+function setVH() { document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px'); }
+setVH(); window.addEventListener('resize', setVH);
+
+})();
+</script>
+</body>
+</html>
